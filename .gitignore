@@ -1,0 +1,83 @@
+# ==========================================
+# Operating System & IDE Files
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.sublime-project
+*.sublime-workspace
+
+# ==========================================
+# Environment & Secrets (Never commit secrets!)
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+
+# ==========================================
+# Frontend (Node.js / Next.js)
+# ==========================================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.npm
+frontend/.eslintcache
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# ==========================================
+# Backend (Java / Maven)
+# ==========================================
+backend-java/target/
+backend-java/*.jar
+backend-java/*.war
+backend-java/*.class
+backend-java/.classpath
+backend-java/.project
+backend-java/.settings/
+backend-java/.factorypath
+
+# Keep Maven Wrapper intact (do not ignore mvnw, mvnw.cmd, .mvn/wrapper)
+!backend-java/.mvn/wrapper/maven-wrapper.jar
+!backend-java/.mvn/wrapper/maven-wrapper.properties
+
+# ==========================================
+# AI Service (Python / FastAPI)
+# ==========================================
+ai-service/__pycache__/
+ai-service/*/__pycache__/
+ai-service/*.py[cod]
+ai-service/*$py.class
+ai-service/.pytest_cache/
+ai-service/.venv/
+ai-service/venv/
+ai-service/env/
+ai-service/ENV/
+ai-service/*.egg-info/
+ai-service/dist/
+ai-service/build/
+ai-service/*.pkl
+ai-service/*.joblib
+
+# ==========================================
+# Database & Logs
+# ==========================================
+database/data/
+*.log
+logs/
+*.sqlite3
