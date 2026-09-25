@@ -29,8 +29,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Browser API URL for client-side bundle generation
-ARG NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+# Browser API URL for client-side bundle generation (empty defaults to same-origin /api/v1 proxy)
+ARG NEXT_PUBLIC_API_URL=""
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
     NEXT_TELEMETRY_DISABLED=1
 
