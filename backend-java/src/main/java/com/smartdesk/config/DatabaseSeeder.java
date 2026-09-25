@@ -1,13 +1,17 @@
 package com.smartdesk.config;
 
-import com.smartdesk.entity.*;
+import com.smartdesk.entity.Agent;
+import com.smartdesk.entity.Category;
+import com.smartdesk.entity.Customer;
+import com.smartdesk.entity.Profile;
+import com.smartdesk.entity.Team;
+import com.smartdesk.entity.User;
 import com.smartdesk.entity.enums.AgentAvailability;
 import com.smartdesk.entity.enums.UserRole;
 import com.smartdesk.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Component
-@Profile("!test")
+@org.springframework.context.annotation.Profile("!test")
 public class DatabaseSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseSeeder.class);
