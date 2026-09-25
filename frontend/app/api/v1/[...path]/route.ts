@@ -47,12 +47,14 @@ async function proxyRequest(request: NextRequest, params: { path: string[] }) {
       headers: responseHeaders,
     });
   } catch (error) {
-    const errMessage = error instanceof Error ? error.message : 'Unknown proxy error';
+    const cause = (error as { cause?: unknown })?.cause;
+    const causeStr = cause ? ` (${cause instanceof Error ? cause.message : JSON.stringify(cause)})` : '';
+    const errMessage = error instanceof Error ? `${error.message}${causeStr}` : 'Unknown proxy error';
     return NextResponse.json(
       {
         success: false,
         error: 'PROXY_GATEWAY_ERROR',
-        message: `Failed to communicate with SmartDesk backend: ${errMessage}`,
+        message: `Failed to communicate with SmartDesk backend at ${targetUrl}: ${errMessage}`,
       },
       { status: 502 }
     );
