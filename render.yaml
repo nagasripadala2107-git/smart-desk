@@ -7,7 +7,7 @@ version: "1"
 databases:
   - name: smartdesk-postgres
     databaseName: smartdesk
-    user: postgres
+    user: smartdesk_user
     plan: free
 
 services:
