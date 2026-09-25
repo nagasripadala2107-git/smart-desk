@@ -1,8 +1,12 @@
 import { TicketPriority, TicketStatus, UserRole } from '@/types';
 
-export const API_BASE_URL = typeof window !== 'undefined'
-  ? `${window.location.protocol}//${window.location.hostname}:8080/api/v1`
-  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1');
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== 'undefined'
+    ? (window.location.port === '3000' && window.location.hostname === 'localhost'
+        ? `${window.location.protocol}//${window.location.hostname}:8080/api/v1`
+        : '/api/v1')
+    : (process.env.INTERNAL_BACKEND_URL ? `${process.env.INTERNAL_BACKEND_URL}/api/v1` : 'http://localhost:8080/api/v1'));
 
 export const ROLE_DASHBOARDS: Record<UserRole, string> = {
   CUSTOMER: '/customer/dashboard',

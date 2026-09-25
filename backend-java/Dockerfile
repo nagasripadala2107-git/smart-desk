@@ -4,30 +4,9 @@
 FROM eclipse-temurin:26-jdk AS builder
 WORKDIR /workspace
 
-# Transparent proxy configuration for Docker Desktop environments
-ARG JAVA_TOOL_OPTIONS="-Dhttps.proxyHost=http.docker.internal -Dhttps.proxyPort=3128 -Dhttp.proxyHost=http.docker.internal -Dhttp.proxyPort=3128"
+# Standard build environment without hardcoded local proxies
+ARG JAVA_TOOL_OPTIONS=""
 ENV JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS}
-
-# Configure Maven proxy for internal build resolution
-RUN mkdir -p /root/.m2 && printf '%s\n' \
-    '<settings>' \
-    '  <proxies>' \
-    '    <proxy>' \
-    '      <id>docker-proxy-http</id>' \
-    '      <active>true</active>' \
-    '      <protocol>http</protocol>' \
-    '      <host>http.docker.internal</host>' \
-    '      <port>3128</port>' \
-    '    </proxy>' \
-    '    <proxy>' \
-    '      <id>docker-proxy-https</id>' \
-    '      <active>true</active>' \
-    '      <protocol>https</protocol>' \
-    '      <host>http.docker.internal</host>' \
-    '      <port>3128</port>' \
-    '    </proxy>' \
-    '  </proxies>' \
-    '</settings>' > /root/.m2/settings.xml
 
 # Copy Maven Wrapper and POM first to leverage layer caching
 COPY .mvn/ .mvn/
@@ -58,11 +37,14 @@ RUN printf '%s\n' \
     'public class HealthCheck {' \
     '    public static void main(String[] args) {' \
     '        try {' \
+    '            String port = System.getenv("PORT");' \
+    '            if (port == null || port.isBlank()) port = System.getenv("SERVER_PORT");' \
+    '            if (port == null || port.isBlank()) port = "8080";' \
     '            HttpClient client = HttpClient.newBuilder()' \
     '                    .connectTimeout(Duration.ofSeconds(3))' \
     '                    .build();' \
     '            HttpRequest request = HttpRequest.newBuilder()' \
-    '                    .uri(URI.create("http://localhost:8080/actuator/health"))' \
+    '                    .uri(URI.create("http://localhost:" + port + "/actuator/health"))' \
     '                    .timeout(Duration.ofSeconds(3))' \
     '                    .GET()' \
     '                    .build();' \
@@ -100,5 +82,6 @@ EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
     CMD java -cp /app HealthCheck || exit 1
 
-# Launch the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Launch the Spring Boot application with container-aware JVM ergonomics
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]

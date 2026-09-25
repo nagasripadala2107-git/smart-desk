@@ -22,8 +22,12 @@ public class TicketDuplicateClient {
         requestFactory.setConnectTimeout(Duration.ofMillis(timeoutMs));
         requestFactory.setReadTimeout(Duration.ofMillis(timeoutMs));
 
+        String normalizedUrl = (serviceUrl.startsWith("http://") || serviceUrl.startsWith("https://"))
+                ? serviceUrl
+                : "http://" + serviceUrl;
+
         this.restClient = RestClient.builder()
-                .baseUrl(serviceUrl)
+                .baseUrl(normalizedUrl)
                 .requestFactory(requestFactory)
                 .build();
     }

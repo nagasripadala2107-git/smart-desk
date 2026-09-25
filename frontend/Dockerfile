@@ -11,18 +11,14 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Build-time proxy configuration for Docker Desktop environments
-ARG HTTP_PROXY="http://http.docker.internal:3128"
-ARG HTTPS_PROXY="http://http.docker.internal:3128"
+ARG HTTP_PROXY=""
+ARG HTTPS_PROXY=""
 ENV HTTP_PROXY=${HTTP_PROXY} \
     HTTPS_PROXY=${HTTPS_PROXY}
 
-# Install dependencies using package-lock.json with socket concurrency limit to prevent proxy connection exhaustion
+# Install dependencies using package-lock.json
 COPY package.json package-lock.json ./
-RUN npm config set maxsockets 3 && \
-    npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm ci --prefer-offline --no-audit
+RUN npm ci --prefer-offline --no-audit
 
 # ------------------------------------------
 # Stage 2: Production Build
