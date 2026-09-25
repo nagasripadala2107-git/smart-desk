@@ -1,0 +1,91 @@
+text,sentiment
+"Thank you so much! The issue was resolved quickly and your support team was wonderful.",POSITIVE
+"I really appreciate your quick help with my invoice issue. Excellent service!",POSITIVE
+"Everything is working perfectly now, thanks a lot for the prompt response.",POSITIVE
+"Great platform, very helpful customer support team. Keep up the good work!",POSITIVE
+"The new feature update fixed our workflow problem completely. Thank you!",POSITIVE
+"Super fast resolution to my account login defect. Highly satisfied.",POSITIVE
+"Thank you for crediting the refund back to my card so quickly.",POSITIVE
+"Your agent was polite, helpful, and answered all my questions clearly.",POSITIVE
+"I am very happy with the prompt assistance provided by technical support.",POSITIVE
+"Thank you for helping me configure my team roles properly. Working great!",POSITIVE
+"Awesome job fixing our webhook connection. It works flawlessly now.",POSITIVE
+"The support engineer was very knowledgeable and resolved our query within minutes.",POSITIVE
+"Thanks for clarifying the subscription billing tiers. Very happy with the service.",POSITIVE
+"Our server migration was seamless thanks to your team's guidance. Much appreciated!",POSITIVE
+"Issue is fixed and all tests are passing. Thank you for the stellar support!",POSITIVE
+"I love the intuitive dashboard and fast responses from your agents.",POSITIVE
+"Thanks for following up to ensure our issue was completely resolved.",POSITIVE
+"The step-by-step instructions solved our issue immediately. Thank you!",POSITIVE
+"Very pleased with how smoothly our refund dispute was handled. Thank you.",POSITIVE
+"Thank you for restoring our access on a weekend. Outstanding support!",POSITIVE
+"Customer service was exceptional, thank you for your patience and care.",POSITIVE
+"Glad to report the patch fixed the memory leak. Thanks for the quick turn-around!",POSITIVE
+"Everything looks good on our end now. Thank you for your help.",POSITIVE
+"Really impressed with the speed and thoroughness of the response. Thanks!",POSITIVE
+"Appreciate the clear explanation of how the routing rules work. Solved!",POSITIVE
+"Your team resolved our security review ticket ahead of schedule. Excellent work!",POSITIVE
+"Thanks for adjusting our license seat count so quickly. Very satisfied.",POSITIVE
+"The support representative was courteous, professional, and efficient.",POSITIVE
+"Happy to confirm that all our endpoints are receiving notifications properly.",POSITIVE
+"Thank you for the quick and effective troubleshooting. Best support experience!",POSITIVE
+"Can you please provide the latest API documentation for webhook integration?",NEUTRAL
+"I need to know the steps to update my billing email address on file.",NEUTRAL
+"How do I add a new team member to our organization workspace?",NEUTRAL
+"What is the difference between the standard and enterprise subscription plans?",NEUTRAL
+"Please clarify our current monthly usage limits and quota reset dates.",NEUTRAL
+"Inquiring about our scheduled maintenance window for this upcoming weekend.",NEUTRAL
+"Could you help us understand how SLA policies are calculated for high-priority tickets?",NEUTRAL
+"Where can I find the invoice receipts for the past financial quarter?",NEUTRAL
+"How can our admin configure custom escalation rules between support tiers?",NEUTRAL
+"Requesting information regarding multi-factor authentication setup for agents.",NEUTRAL
+"Can you please explain the data retention period for closed customer tickets?",NEUTRAL
+"We would like to know if single sign-on via SAML is supported on our current plan.",NEUTRAL
+"Please provide guidance on exporting ticket metrics and audit logs to CSV.",NEUTRAL
+"How do I transfer ticket ownership from one agent to another?",NEUTRAL
+"Inquiring about the procedure to update our registered company phone number.",NEUTRAL
+"What are the supported payment methods for international wire transfers?",NEUTRAL
+"Could you explain the process for submitting product enhancement requests?",NEUTRAL
+"Checking on the status of our ticket submission from earlier this morning.",NEUTRAL
+"Where in the settings can I view the active session tokens for our account?",NEUTRAL
+"Please confirm if our API rate limits are applied per user or per organization.",NEUTRAL
+"How do I change the default notification preferences for resolved tickets?",NEUTRAL
+"Requesting clarification on the role permissions available for agents versus admins.",NEUTRAL
+"Is there a sandbox testing environment available for the AI classification API?",NEUTRAL
+"Please send us the compliance certification documents for our annual audit.",NEUTRAL
+"How do I archive tickets that have been closed for more than six months?",NEUTRAL
+"Could you confirm the timezone used for timestamp logging in audit events?",NEUTRAL
+"Inquiring about adding custom tags or labels to ticket categorization.",NEUTRAL
+"Please provide the contact details for our dedicated account manager.",NEUTRAL
+"How can I verify which agent is currently assigned to our pending ticket?",NEUTRAL
+"What are the recommended server hardware specifications for high throughput?",NEUTRAL
+"I have been charged twice for the same subscription and nobody has fixed this for three days.",NEGATIVE
+"Our production server is completely down and nobody is answering our critical calls!",NEGATIVE
+"This is the third time our payment failed and we are completely blocked from work.",NEGATIVE
+"I am furious with the terrible service and unacceptable delay in resolving our issue.",NEGATIVE
+"Still waiting for a response on our urgent security incident. This is ridiculous!",NEGATIVE
+"Your system crashed and corrupted our database during the scheduled backup.",NEGATIVE
+"Cannot login to our admin account, error 500 keeps appearing and we need access immediately.",NEGATIVE
+"We have been waiting for a week for our refund and nobody has responded to our emails.",NEGATIVE
+"This software defect has broken our billing pipeline and our customers cannot checkout.",NEGATIVE
+"Extremely frustrated with the lack of communication regarding our prolonged outage.",NEGATIVE
+"Unacceptable downtime during business hours. We are losing revenue every hour.",NEGATIVE
+"Our tickets keep getting closed without any resolution or explanation from support.",NEGATIVE
+"The system is constantly freezing and throwing timeout exceptions on every request.",NEGATIVE
+"I demand an immediate refund for the unauthorized charges on our credit card.",NEGATIVE
+"None of our agents can log in this morning. We are dead in the water and need help ASAP.",NEGATIVE
+"Still not fixed after three escalations! This is the worst support experience ever.",NEGATIVE
+"Why has nobody responded to our urgent ticket? Our critical services are impacted.",NEGATIVE
+"The latest update completely broke our integration and all API calls are failing.",NEGATIVE
+"We were charged for an enterprise tier that we explicitly canceled last month.",NEGATIVE
+"I am very upset that our data was lost during your unannounced server reboot.",NEGATIVE
+"Nobody is helping us with this critical issue and our deadline is in two hours.",NEGATIVE
+"The support phone line disconnects and our emails are ignored. Horrible experience.",NEGATIVE
+"Everything is broken after the patch and we cannot process any customer transactions.",NEGATIVE
+"Repeated login timeouts and authentication rejections. This is driving our team crazy.",NEGATIVE
+"You double billed our account and locked our access when we questioned the charge.",NEGATIVE
+"We have submitted five tickets about this issue and received only automated replies.",NEGATIVE
+"Severe performance degradation making the application completely unusable today.",NEGATIVE
+"Our confidential audit reports are inaccessible and our compliance deadline is today.",NEGATIVE
+"The application keeps crashing every ten minutes. We cannot work like this!",NEGATIVE
+"Terrible experience trying to reach support. No one takes ownership of the problem.",NEGATIVE

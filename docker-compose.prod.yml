@@ -1,0 +1,222 @@
+name: smartdesk-prod
+
+services:
+  # ===========================================================================
+  # 1. Nginx Reverse Proxy & TLS Terminator (Public Ingress)
+  # ===========================================================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: smartdesk-prod-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - smartdesk_prod_certs:/etc/nginx/certs:ro
+      - smartdesk_prod_acme:/var/www/certbot:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - smartdesk-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:80/ || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ===========================================================================
+  # 2. Next.js Standalone Frontend Application
+  # ===========================================================================
+  frontend:
+    image: smartdesk-frontend:prod
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+    container_name: smartdesk-prod-frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api/v1}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - smartdesk-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ===========================================================================
+  # 3. Java Spring Boot Business Backend ('prod' profile)
+  # ===========================================================================
+  backend:
+    image: smartdesk-backend:prod
+    build:
+      context: ./backend-java
+    container_name: smartdesk-prod-backend
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-smartdesk}
+      - DB_USERNAME=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - AI_SERVICE_URL=http://ai-service:8000
+      - AI_TIMEOUT_MS=${AI_TIMEOUT_MS:-3000}
+      - SERVER_PORT=8080
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - RATE_LIMIT_AUTH_PER_MINUTE=${RATE_LIMIT_AUTH_PER_MINUTE:-30}
+      - DB_POOL_MAX_SIZE=${DB_POOL_MAX_SIZE:-20}
+      - DB_POOL_MIN_IDLE=${DB_POOL_MIN_IDLE:-5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+    networks:
+      - smartdesk-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app", "HealthCheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ===========================================================================
+  # 4. Python FastAPI AI Classification Microservice
+  # ===========================================================================
+  ai-service:
+    image: smartdesk-ai:prod
+    build:
+      context: ./ai-service
+    container_name: smartdesk-prod-ai
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    restart: unless-stopped
+    expose:
+      - "8000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+    networks:
+      - smartdesk-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; res = urllib.request.urlopen('http://localhost:8000/health'); exit(0 if res.getcode() == 200 else 1)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ===========================================================================
+  # 5. PostgreSQL 17 Relational Database (Internal Only, No Host Port)
+  # ===========================================================================
+  postgres:
+    image: postgres:17
+    container_name: smartdesk-prod-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-smartdesk}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    expose:
+      - "5432"
+    volumes:
+      - smartdesk_postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartdesk-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-smartdesk}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  # ===========================================================================
+  # 6. Automated PostgreSQL Nightly Backup Service
+  # ===========================================================================
+  backup:
+    image: smartdesk-backup:prod
+    build:
+      context: .
+      dockerfile: ./docker/backup/Dockerfile
+    container_name: smartdesk-prod-backup
+    restart: unless-stopped
+    environment:
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=${POSTGRES_DB:-smartdesk}
+      - PGUSER=${POSTGRES_USER:-postgres}
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-14}
+      - BACKUP_CRON_SCHEDULE=${BACKUP_CRON_SCHEDULE:-0 2 * * *}
+      - BACKUP_ON_STARTUP=${BACKUP_ON_STARTUP:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - smartdesk_prod_backups:/backups
+    networks:
+      - smartdesk-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  smartdesk-prod-network:
+    name: smartdesk-prod-network
+    driver: bridge
+
+volumes:
+  smartdesk_postgres_data:
+    external: true
+  smartdesk_prod_backups:
+    name: smartdesk_prod_backups
+  smartdesk_prod_certs:
+    name: smartdesk_prod_certs
+  smartdesk_prod_acme:
+    name: smartdesk_prod_acme

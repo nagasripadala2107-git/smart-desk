@@ -1,0 +1,206 @@
+name: smartdesk-staging
+
+services:
+  # ===========================================================================
+  # 1. Nginx Reverse Proxy & TLS Terminator (Public Staging Ingress)
+  # ===========================================================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: smartdesk-staging-nginx
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+      - "8443:443"
+    volumes:
+      - ./docker/nginx/nginx.staging.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/staging-certs:/etc/nginx/certs:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - smartdesk-staging-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:80/ || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ===========================================================================
+  # 2. Next.js Standalone Frontend Application
+  # ===========================================================================
+  frontend:
+    image: smartdesk-frontend:staging
+    container_name: smartdesk-staging-frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_API_URL=/api/v1
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - smartdesk-staging-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ===========================================================================
+  # 3. Java Spring Boot Business Backend ('prod' profile)
+  # ===========================================================================
+  backend:
+    image: smartdesk-backend:staging
+    container_name: smartdesk-staging-backend
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=smartdesk
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=staging_secret_password_2026
+      - AI_SERVICE_URL=http://ai-service:8000
+      - AI_TIMEOUT_MS=3000
+      - SERVER_PORT=8080
+      - CORS_ALLOWED_ORIGINS=https://localhost:8443,http://localhost:8088
+      - JWT_SECRET=StagingSuperSecretKeyWithAtLeast32BytesForHmacSha256Testing!
+      - RATE_LIMIT_AUTH_PER_MINUTE=30
+      - DB_POOL_MAX_SIZE=20
+      - DB_POOL_MIN_IDLE=5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+    networks:
+      - smartdesk-staging-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app", "HealthCheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ===========================================================================
+  # 4. Python FastAPI AI Classification Microservice
+  # ===========================================================================
+  ai-service:
+    image: smartdesk-ai:staging
+    container_name: smartdesk-staging-ai
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    restart: unless-stopped
+    expose:
+      - "8000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+    networks:
+      - smartdesk-staging-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; res = urllib.request.urlopen('http://localhost:8000/health'); exit(0 if res.getcode() == 200 else 1)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ===========================================================================
+  # 5. PostgreSQL 17 Relational Database (Internal Staging Only)
+  # ===========================================================================
+  postgres:
+    image: postgres:17
+    container_name: smartdesk-staging-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=smartdesk
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=staging_secret_password_2026
+    expose:
+      - "5432"
+    volumes:
+      - smartdesk_staging_data:/var/lib/postgresql/data
+    networks:
+      - smartdesk-staging-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d smartdesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  # ===========================================================================
+  # 6. Automated PostgreSQL Nightly Backup Service
+  # ===========================================================================
+  backup:
+    image: smartdesk-backup:staging
+    container_name: smartdesk-staging-backup
+    restart: unless-stopped
+    environment:
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=smartdesk
+      - PGUSER=postgres
+      - PGPASSWORD=staging_secret_password_2026
+      - BACKUP_RETENTION_DAYS=14
+      - BACKUP_CRON_SCHEDULE=0 2 * * *
+      - BACKUP_ON_STARTUP=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - smartdesk_staging_backups:/backups
+    networks:
+      - smartdesk-staging-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  smartdesk-staging-network:
+    name: smartdesk-staging-network
+    driver: bridge
+
+volumes:
+  smartdesk_staging_data:
+    name: smartdesk_staging_data
+  smartdesk_staging_backups:
+    name: smartdesk_staging_backups

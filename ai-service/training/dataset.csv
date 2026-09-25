@@ -1,0 +1,91 @@
+text,category
+"Payment was charged twice on my credit card statement",BILLING
+"Incorrect billing amount on invoice for current billing cycle",BILLING
+"Unexpected charge appeared on my card after cancellation",BILLING
+"Duplicate payment transaction processed for my order",BILLING
+"Need an updated VAT invoice receipt for accounting tax purposes",BILLING
+"Credit card payment failed with code declined by processor",BILLING
+"My bank statement shows a charge that does not match my receipt",BILLING
+"Discrepancy in billing calculations and tax breakdown on monthly statement",BILLING
+"Cannot update my credit card details in billing settings",BILLING
+"I received an overdue payment notification despite successful charge",BILLING
+"I cannot connect to the application or api service",TECHNICAL
+"Connection timeout error 504 when accessing dashboard",TECHNICAL
+"Database connection pool exhausted during peak request volume",TECHNICAL
+"Server returned 500 internal server error on checkout endpoint",TECHNICAL
+"SSL certificate validation error when calling api gateway",TECHNICAL
+"Websocket connection drops repeatedly every few minutes",TECHNICAL
+"Latency spike and high response time on backend endpoints",TECHNICAL
+"DNS resolution failure when resolving application hostname",TECHNICAL
+"Network handshake failure when calling authentication endpoints",TECHNICAL
+"Application server is unreachable from our office corporate network",TECHNICAL
+"I forgot my account password and need a reset link",ACCOUNT
+"Cannot log into my customer account with current credentials",ACCOUNT
+"Account locked after too many unsuccessful login attempts",ACCOUNT
+"How do I update my profile primary email address",ACCOUNT
+"Two factor authentication code is not being delivered to my phone",ACCOUNT
+"Need to transfer account ownership to another company administrator",ACCOUNT
+"Unable to access user settings or edit account profile",ACCOUNT
+"How can I delete or deactivate my user account completely",ACCOUNT
+"SSO single sign-on authentication fails for our enterprise domain",ACCOUNT
+"Lost access to authenticator app recovery codes for account",ACCOUNT
+"I want a full refund for my recent purchase",REFUND
+"Requesting money back because the service did not meet expectations",REFUND
+"Refund status check for transaction processed last week",REFUND
+"Accidental purchase please refund to original payment method",REFUND
+"Service cancellation and prorated refund request for remaining balance",REFUND
+"Duplicate charge refund request to original credit card",REFUND
+"Where is my refund for returned enterprise software license",REFUND
+"Requesting charge reversal and reimbursement for downtime",REFUND
+"Customer dissatisfaction refund request within money back guarantee window",REFUND
+"Refund was approved but has not reflected in bank account after ten days",REFUND
+"Someone accessed my account without permission suspicious login",SECURITY
+"Received notification of unauthorized login from an unknown ip address",SECURITY
+"Potential data breach or credential leak notification on our domain",SECURITY
+"Suspicious api activity and unauthorized access token usage detected",SECURITY
+"Urgent report of vulnerable endpoint or security exploit",SECURITY
+"Employee left the company please revoke all active api keys immediately",SECURITY
+"Our credentials might have been compromised in a third party phishing attack",SECURITY
+"Suspicious password reset request generated that I did not initiate",SECURITY
+"Security audit inquiry regarding data encryption at rest and in transit",SECURITY
+"Unauthorized user added themselves to our organization permissions",SECURITY
+"I want to upgrade my subscription plan to enterprise tier",SUBSCRIPTION
+"How do I downgrade my monthly plan to standard tier",SUBSCRIPTION
+"Cancel my recurring subscription before next renewal date",SUBSCRIPTION
+"Add more user seats and licenses to our annual subscription",SUBSCRIPTION
+"Subscription renewal failed due to expired credit card",SUBSCRIPTION
+"Change billing frequency from monthly to annual billing plan",SUBSCRIPTION
+"Questions regarding enterprise tier features and subscription limits",SUBSCRIPTION
+"Pause subscription temporarily for two months",SUBSCRIPTION
+"Subscription tier features are not unlocked after upgrade",SUBSCRIPTION
+"Automatic renewal charge confirmation for annual subscription",SUBSCRIPTION
+"The application crashes when I try to upload a file",BUG
+"Button is completely unresponsive when clicking submit in chrome",BUG
+"Form validation displays incorrect error message on valid input",BUG
+"Page displays a white blank screen on mobile safari",BUG
+"Dropdown menu is cut off and hidden behind table header",BUG
+"Data export produces an empty corrupted csv file",BUG
+"Ticket status does not update after saving changes without page reload",BUG
+"Infinite loading spinner when opening user profile modal",BUG
+"Search filter resets automatically when switching pagination pages",BUG
+"Null pointer exception displayed in browser console on page load",BUG
+"Please add dark mode support to the application dashboard",FEATURE_REQUEST
+"Would love to see integration with Slack or Microsoft Teams",FEATURE_REQUEST
+"Request to add custom fields and tags to ticket forms",FEATURE_REQUEST
+"Can you implement keyboard shortcuts for faster navigation",FEATURE_REQUEST
+"Feature suggestion export reports directly to PDF format",FEATURE_REQUEST
+"Ability to bulk edit and assign multiple tickets simultaneously",FEATURE_REQUEST
+"Wishlist item customizable email notification templates",FEATURE_REQUEST
+"Request for webhook support to trigger external automation workflows",FEATURE_REQUEST
+"Please add multi language translation support for customer tickets",FEATURE_REQUEST
+"Feature request custom dashboard widgets and KPI metrics",FEATURE_REQUEST
+"General inquiry regarding company office location and mailing address",OTHER
+"I have a question that does not fit into any specific category",OTHER
+"Partnership and business development proposal for your platform",OTHER
+"Feedback on user documentation and tutorials format",OTHER
+"Inquiry regarding upcoming holiday support team schedule",OTHER
+"Media press inquiry and corporate contact information",OTHER
+"Request for general information about your service terms of service",OTHER
+"Seeking advice on general best practices for helpdesk management",OTHER
+"Miscellaneous question regarding platform announcements",OTHER
+"General feedback about company branding and website redesign",OTHER

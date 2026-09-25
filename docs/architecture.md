@@ -50,62 +50,76 @@ SmartDesk follows a decoupled, service-oriented architecture:
 ```
 
 ### Component Roles & Boundaries
-1. **Frontend (Next.js)**:
+1. **Frontend (Next.js App Router, React, TypeScript)**:
    - Presentation layer only.
-   - Communicates exclusively with the Java backend via authenticated REST endpoints.
-   - Zero direct communication with the Python AI service or PostgreSQL.
-2. **Primary Backend (Java Spring Boot)**:
-   - Source of truth for business logic, data persistence, transactions, and security.
-   - Enforces Role-Based Access Control (RBAC) and data validation.
-   - Invokes the AI service synchronously during ticket ingestion.
-   - Executes the routing algorithm and manages graph-based escalation.
+   - Communicates exclusively with the Java backend via authenticated REST endpoints (`/api/v1/*` with Bearer JWT).
+   - Browser client connects directly to `http://localhost:8080/api/v1`. Zero direct communication with the Python AI service or PostgreSQL.
+2. **Primary Business Backend (Java Spring Boot 3+, Java 21/26)**:
+   - Single authoritative source of truth for business logic, data persistence, transactions, and security.
+   - Enforces Role-Based Access Control (`CUSTOMER`, `AGENT`, `ADMIN`), customer data isolation, and validation.
+   - Houses the deterministic rule-based routing engine and invokes the Python AI classifier over the Docker bridge network.
+   - Connects to PostgreSQL via Spring Data JPA with `spring.jpa.hibernate.ddl-auto=validate`.
 3. **AI Classification Service (Python FastAPI)**:
-   - Stateless microservice exposing high-throughput prediction endpoints.
-   - Categorizes ticket subject and description using a trained ML pipeline (TF-IDF + Logistic Regression).
-   - Returns predicted category, confidence score, and model metadata.
-4. **Database (PostgreSQL)**:
-   - Relational data persistence with strict foreign key constraints, indexes, and transactional consistency.
+   - Stateless microservice exposing high-throughput prediction endpoint (`POST /api/v1/classify`).
+   - Categorizes ticket text using a trained scikit-learn pipeline (TF-IDF + Logistic Regression).
+   - Port 8000 remains strictly private to `smartdesk-network`.
+4. **Database (PostgreSQL 17)**:
+   - Relational data persistence across 17 normalized tables with strict foreign key constraints, indexes, and transactional consistency.
+   - Data persisted across container lifecycles in named external volume `smartdesk_postgres_data`.
+5. **Orchestration (Docker Compose)**:
+   - Single-command orchestration (`docker compose up -d`) with health-check-driven startup ordering.
 
 ---
 
 ## 3. Core Database Entities & Relationships
 
+The database architecture comprises 17 fully normalized relational tables in PostgreSQL 14+:
+
 ```mermaid
 erDiagram
-    USER ||--o| PROFILE : has
-    USER ||--o| CUSTOMER : "is a"
-    USER ||--o| AGENT : "is a"
-    TEAM ||--o{ AGENT : contains
-    CATEGORY ||--o{ TICKET : categorizes
-    CUSTOMER ||--o{ TICKET : submits
-    AGENT ||--o{ TICKET : assigned_to
-    TICKET ||--o{ TICKET_MESSAGE : contains
-    TICKET ||--o{ TICKET_ASSIGNMENT : tracks
-    TICKET ||--o{ TICKET_EVENT : records
-    TICKET ||--o{ ESCALATION : triggers
-    TEAM ||--o{ ESCALATION : escalates_to
+    USERS ||--|| PROFILES : has
+    USERS ||--o| CUSTOMERS : "is a"
+    USERS ||--o| AGENTS : "is a"
+    TEAMS ||--o{ AGENTS : contains
+    TEAMS ||--o{ TICKETS : "assigned queue"
+    CATEGORIES ||--o{ TICKETS : categorizes
+    CUSTOMERS ||--o{ TICKETS : submits
+    AGENTS ||--o{ TICKETS : "assigned to"
+    TICKETS ||--o{ TICKET_MESSAGES : contains
+    TICKETS ||--o{ TICKET_ATTACHMENTS : stores
+    TICKETS ||--o{ TICKET_ASSIGNMENTS : tracks
+    TICKETS ||--o{ TICKET_EVENTS : records
+    TICKETS ||--o{ ESCALATIONS : triggers
+    TEAMS ||--o{ ESCALATIONS : escalates_to
+    CATEGORIES ||--o{ ROUTING_RULES : configures
+    TEAMS ||--o{ ROUTING_RULES : routes_to
+    TEAMS ||--o{ ESCALATION_RULES : from_team
+    TEAMS ||--o{ ESCALATION_RULES : to_team
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ AUDIT_LOGS : records
 ```
 
-### Entity Catalog
+### Entity Catalog (17 Tables)
 
 | Entity | Primary Purpose | Key Fields |
 | :--- | :--- | :--- |
-| **User** | Authentication and identity | `id`, `email`, `password_hash`, `role`, `status`, `created_at` |
-| **Profile** | User personal details | `id`, `user_id`, `first_name`, `last_name`, `phone`, `avatar_url` |
-| **Customer** | Customer domain entity | `id`, `user_id`, `company_name`, `account_tier` |
-| **Agent** | Support agent domain entity | `id`, `user_id`, `team_id`, `skills`, `max_active_tickets` |
-| **Team** | Functional support group | `id`, `name`, `tier_level` (Tier 1, Tier 2, etc.), `specialty` |
-| **Category** | Ticket taxonomy | `id`, `code`, `display_name`, `description` |
-| **Ticket** | Primary support unit | `id`, `ticket_number`, `customer_id`, `category_id`, `assigned_agent_id`, `team_id`, `priority`, `status`, `ai_category`, `ai_confidence` |
-| **TicketMessage**| Conversation thread entry | `id`, `ticket_id`, `sender_id`, `body`, `is_internal_note`, `created_at` |
-| **TicketAssignment**| History of ticket assignments | `id`, `ticket_id`, `agent_id`, `assigned_by`, `assigned_at`, `unassigned_at` |
-| **TicketEvent** | Complete audit timeline | `id`, `ticket_id`, `event_type`, `actor_id`, `old_value`, `new_value`, `timestamp` |
-| **Escalation** | Record of ticket tier bump | `id`, `ticket_id`, `from_team_id`, `to_team_id`, `reason`, `status`, `created_at` |
-| **RoutingRule** | Automated routing criteria | `id`, `category_id`, `priority`, `target_team_id`, `is_active` |
-| **EscalationRule**| Conditions triggering escalation | `id`, `trigger_type`, `threshold_minutes`, `target_team_id` |
-| **SlaPolicy** | Response and resolution limits | `id`, `priority`, `response_time_minutes`, `resolution_time_minutes` |
-| **Notification** | Real-time user alert | `id`, `user_id`, `title`, `message`, `is_read`, `created_at` |
-| **AuditLog** | System-wide governance log | `id`, `user_id`, `action`, `resource`, `ip_address`, `timestamp` |
+| **User** (`users`) | Authentication and identity | `id` (UUID), `email`, `password_hash`, `role` (CUSTOMER, AGENT, ADMIN), `is_active` |
+| **Profile** (`profiles`) | User personal contact details | `id` (UUID), `user_id` (FK 1:1), `first_name`, `last_name`, `phone`, `avatar_url` |
+| **Customer** (`customers`) | Customer organization & subscription | `id` (UUID), `user_id` (FK 1:1), `customer_code`, `company_name`, `plan` |
+| **Team** (`teams`) | Functional support queues | `id` (UUID), `name`, `description`, `is_active` |
+| **Agent** (`agents`) | Agent operational parameters | `id` (UUID), `user_id` (FK 1:1), `team_id` (FK), `employee_code`, `availability_status`, `skills`, `max_active_tickets` |
+| **Category** (`categories`) | Ticket taxonomy (9 categories) | `id` (UUID), `name` (BILLING, TECHNICAL, ACCOUNT, REFUND, SECURITY, SUBSCRIPTION, BUG, FEATURE_REQUEST, OTHER), `is_active` |
+| **Ticket** (`tickets`) | Primary support operational unit | `id` (UUID), `ticket_number`, `customer_id`, `category_id`, `assigned_agent_id`, `assigned_team_id`, `subject`, `description`, `priority`, `status`, `ai_category`, `ai_confidence`, `ai_model_version` |
+| **TicketMessage** (`ticket_messages`) | Conversation thread & internal staff notes | `id` (UUID), `ticket_id` (FK), `sender_user_id` (FK), `message`, `is_internal` |
+| **TicketAttachment** (`ticket_attachments`) | Attached file metadata and cloud URL | `id` (UUID), `ticket_id` (FK), `message_id` (FK), `file_name`, `file_url`, `mime_type`, `file_size` |
+| **TicketAssignment** (`ticket_assignments`) | Historical assignment audit trail | `id` (UUID), `ticket_id` (FK), `agent_id` (FK), `team_id` (FK), `assigned_by_user_id` (FK), `assigned_at`, `unassigned_at` |
+| **TicketEvent** (`ticket_events`) | Chronological event timeline | `id` (UUID), `ticket_id` (FK), `actor_user_id` (FK), `event_type`, `old_value`, `new_value`, `metadata` (JSONB) |
+| **Escalation** (`escalations`) | Multi-tier ticket escalation cases | `id` (UUID), `ticket_id` (FK), `from_team_id` (FK), `to_team_id` (FK), `from_agent_id`, `to_agent_id`, `level`, `reason`, `status` |
+| **RoutingRule** (`routing_rules`) | Automated category/priority routing | `id` (UUID), `name`, `category_id` (FK), `priority`, `team_id` (FK), `priority_weight`, `is_active` |
+| **EscalationRule** (`escalation_rules`) | Threshold-based escalation triggers | `id` (UUID), `name`, `from_team_id` (FK), `to_team_id` (FK), `trigger_type`, `trigger_value`, `escalation_level`, `is_active` |
+| **SlaPolicy** (`sla_policies`) | Response and resolution SLA targets | `id` (UUID), `name`, `priority`, `first_response_minutes`, `resolution_minutes`, `is_active` |
+| **Notification** (`notifications`) | User alert and notification feed | `id` (UUID), `user_id` (FK), `ticket_id` (FK), `type`, `title`, `message`, `is_read` |
+| **AuditLog** (`audit_logs`) | System governance and security log | `id` (BIGSERIAL), `actor_user_id` (FK), `action`, `entity_type`, `entity_id`, `old_data` (JSONB), `new_data` (JSONB), `ip_address`, `user_agent` |
 
 ---
 
@@ -117,11 +131,11 @@ erDiagram
      v
 [ Java Spring Boot Controller ]
      | 2. Validate DTO & Authenticate Customer
-     | 3. POST /predict to Python FastAPI (Subject + Description)
+     | 3. POST /api/v1/classify to Python FastAPI (Subject + Description)
      v
 [ Python AI Service ]
      | 4. Clean text -> TF-IDF Vectorizer -> Logistic Regression Classifier
-     | 5. Return: { category: "BILLING", confidence: 0.94, model_version: "v1.0" }
+     | 5. Return: { category: "BILLING", confidence: 0.94, model_version: "ticket-classifier-v1" }
      v
 [ Java Spring Boot Core ]
      | 6. Persist Ticket (Status: OPEN, ai_category: BILLING, ai_confidence: 0.94)
@@ -245,9 +259,8 @@ Relational algebra operators map directly to optimized SQL queries within SmartD
 - **Authentication**: Stateless JWT or HttpOnly secure session cookies.
 - **Role-Based Access Control (RBAC)**:
   - `CUSTOMER`: Can only access their own profile and submitted tickets.
-  - `AGENT`: Can access tickets assigned to them or their assigned teams.
-  - `MANAGER`: Can oversee team queues, SLA reports, and override assignments.
-  - `ADMIN`: Full system configuration, user provisioning, rule customization, and audit logs.
+  - `AGENT`: Can access tickets assigned to them or their assigned teams and inspect AI advisory metadata.
+  - `ADMIN`: Full system configuration, user provisioning, rule customization, operational analytics, and audit logs.
 - **Data Protection**:
   - Passwords hashed using BCrypt / Argon2.
   - Parameterized queries via Spring Data JPA prevent SQL injection.
