@@ -11,12 +11,12 @@ function getBackendBaseUrl(): string {
 }
 
 async function proxyRequest(request: NextRequest, params: { path: string[] }) {
-  try {
-    const backendBase = getBackendBaseUrl();
-    const subPath = params.path ? params.path.join('/') : '';
-    const search = request.nextUrl.search;
-    const targetUrl = `${backendBase}/api/v1/${subPath}${search}`;
+  const backendBase = getBackendBaseUrl();
+  const subPath = params.path ? params.path.join('/') : '';
+  const search = request.nextUrl.search;
+  const targetUrl = `${backendBase}/api/v1/${subPath}${search}`;
 
+  try {
     const headers = new Headers();
     request.headers.forEach((value, key) => {
       if (key.toLowerCase() !== 'host') {
