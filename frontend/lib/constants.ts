@@ -1,12 +1,28 @@
 import { TicketPriority, TicketStatus, UserRole } from '@/types';
 
+function getInitialBackendUrl(): string {
+  let backend = process.env.INTERNAL_BACKEND_URL;
+  if (!backend) return 'http://localhost:8080/api/v1';
+  backend = backend.trim();
+  if (backend.includes('.onrender.com')) {
+    return backend.startsWith('http') ? `${backend}/api/v1` : `https://${backend}/api/v1`;
+  }
+  const clean = backend.replace(/^https?:\/\//, '');
+  const [hostWithoutPort] = clean.split(':');
+  const [hostname] = hostWithoutPort.split('/');
+  if (hostname.startsWith('smartdesk-backend-')) {
+    return `https://${hostname}.onrender.com/api/v1`;
+  }
+  return backend.startsWith('http') ? `${backend}/api/v1` : `http://${backend}/api/v1`;
+}
+
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   (typeof window !== 'undefined'
     ? (window.location.port === '3000' && window.location.hostname === 'localhost'
         ? `${window.location.protocol}//${window.location.hostname}:8080/api/v1`
         : '/api/v1')
-    : (process.env.INTERNAL_BACKEND_URL ? `${process.env.INTERNAL_BACKEND_URL}/api/v1` : 'http://localhost:8080/api/v1'));
+    : getInitialBackendUrl());
 
 export const ROLE_DASHBOARDS: Record<UserRole, string> = {
   CUSTOMER: '/customer/dashboard',
