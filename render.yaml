@@ -60,6 +60,8 @@ services:
         fromDatabase:
           name: smartdesk-postgres
           property: password
+      - key: DB_SSL_PARAM
+        value: "?sslmode=require"
       - key: AI_SERVICE_URL
         fromService:
           type: web

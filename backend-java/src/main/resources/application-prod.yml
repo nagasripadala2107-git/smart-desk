@@ -16,7 +16,7 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
     properties:
       hibernate:
         format_sql: false

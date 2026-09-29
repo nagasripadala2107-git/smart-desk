@@ -95,6 +95,7 @@ services:
       - RATE_LIMIT_AUTH_PER_MINUTE=${RATE_LIMIT_AUTH_PER_MINUTE:-30}
       - DB_POOL_MAX_SIZE=${DB_POOL_MAX_SIZE:-20}
       - DB_POOL_MIN_IDLE=${DB_POOL_MIN_IDLE:-5}
+      - HIBERNATE_DDL_AUTO=${HIBERNATE_DDL_AUTO:-update}
     depends_on:
       postgres:
         condition: service_healthy
@@ -160,6 +161,7 @@ services:
       - "5432"
     volumes:
       - smartdesk_postgres_data:/var/lib/postgresql/data
+      - ./database/init_all.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     networks:
       - smartdesk-prod-network
     logging:

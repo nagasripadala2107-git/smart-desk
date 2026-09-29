@@ -44,7 +44,7 @@ RUN printf '%s\n' \
     '                    .connectTimeout(Duration.ofSeconds(3))' \
     '                    .build();' \
     '            HttpRequest request = HttpRequest.newBuilder()' \
-    '                    .uri(URI.create("http://localhost:" + port + "/actuator/health"))' \
+    '                    .uri(URI.create("http://127.0.0.1:" + port + "/actuator/health"))' \
     '                    .timeout(Duration.ofSeconds(3))' \
     '                    .GET()' \
     '                    .build();' \
@@ -79,7 +79,7 @@ USER appuser
 EXPOSE 8080
 
 # Health check using the native Java Actuator health checker
-HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=5s --start-period=45s --retries=3 \
     CMD java -cp /app HealthCheck || exit 1
 
 # Launch the Spring Boot application with container-aware JVM ergonomics
