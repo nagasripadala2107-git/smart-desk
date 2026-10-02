@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import {
   AnalyticsOverviewResponse,
@@ -25,7 +26,7 @@ import { EscalationOverviewCard } from '@/components/analytics/EscalationOvervie
 import { SlaComplianceCard } from '@/components/analytics/SlaComplianceCard';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 import { ErrorState } from '@/components/common/ErrorState';
-import { RefreshCw, Database } from 'lucide-react';
+import { RefreshCw, Database, ShieldAlert, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function AdminDashboardPage() {
@@ -153,11 +154,27 @@ export default function AdminDashboardPage() {
           title="Admin Operations & Analytics"
           description="Operational KPIs, ticket volume trends, team workloads, and SLA compliance metrics."
         />
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            <Database className="w-3.5 h-3.5 text-indigo-500" />
-            Operational data from PostgreSQL
-          </span>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Link href="/admin/escalation-rules">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              Escalation Matrix
+            </Button>
+          </Link>
+          <Link href="/admin/agents">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/60 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
+            >
+              <Users className="w-3.5 h-3.5" />
+              Workforce Directory
+            </Button>
+          </Link>
           <Button
             variant="outline"
             size="sm"

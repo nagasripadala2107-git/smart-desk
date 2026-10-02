@@ -11,6 +11,7 @@ import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import {
   Ticket,
   AlertTriangle,
@@ -88,22 +89,41 @@ export default function AgentDashboardPage() {
       <PageHeader
         title={`Agent Console — ${queue.agentName}`}
         description={`Team: ${queue.teamName || 'Support Operations'} • Employee Code: ${queue.employeeCode}`}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link href="/agent/escalations">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-semibold"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                4-Tier Escalation Path
+              </Button>
+            </Link>
+          </div>
+        }
       />
 
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Open Tickets"
-          value={openTickets.length}
-          icon={<Ticket className="w-5 h-5" />}
-          description="In your active queue"
-        />
-        <StatCard
-          title="Escalated Tickets"
-          value={escalatedTickets.length}
-          icon={<AlertTriangle className="w-5 h-5" />}
-          description="Tier 2/3 active escalations"
-        />
+        <Link href="/agent/tickets" className="block hover:scale-[1.01] transition-transform">
+          <StatCard
+            title="Open Tickets"
+            value={openTickets.length}
+            icon={<Ticket className="w-5 h-5" />}
+            description="In your active queue"
+          />
+        </Link>
+        <Link href="/agent/escalations" className="block hover:scale-[1.01] transition-transform">
+          <StatCard
+            title="Escalated Tickets"
+            value={escalatedTickets.length}
+            icon={<AlertTriangle className="w-5 h-5 text-rose-500" />}
+            description="Tier 2/3 active escalations (Click to view)"
+            className="border-rose-200 dark:border-rose-900/60"
+          />
+        </Link>
         <StatCard
           title="SLA Risk"
           value={priorityTickets.length}

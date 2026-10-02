@@ -32,7 +32,7 @@ export function DashboardShell({ children, allowedRole }: DashboardShellProps) {
         const targetRole = allowedRole || 'CUSTOMER';
         const creds = DEMO_CREDENTIALS[targetRole];
         setIsAutoLoggingIn(true);
-        login({ email: creds.email, password: 'Password123!' })
+        login({ email: creds.email, password: 'Password123!' }, false)
           .catch((err) => {
             console.error('Demo auto-login fallback failed', err);
             router.push('/login');
@@ -41,15 +41,12 @@ export function DashboardShell({ children, allowedRole }: DashboardShellProps) {
             setIsAutoLoggingIn(false);
           });
       } else if (allowedRole && user && user.role !== allowedRole && user.role !== 'ADMIN') {
-        // Automatically switch demo role to match current section for reviewers
+        // Automatically switch demo role to match current section for reviewers without kicking away from current URL
         const creds = DEMO_CREDENTIALS[allowedRole];
         setIsAutoLoggingIn(true);
-        login({ email: creds.email, password: 'Password123!' })
+        login({ email: creds.email, password: 'Password123!' }, false)
           .catch((err) => {
             console.error('Demo role switch failed', err);
-            if (user.role === 'CUSTOMER') router.push('/customer/dashboard');
-            else if (user.role === 'AGENT') router.push('/agent/dashboard');
-            else if (user.role === 'ADMIN') router.push('/admin/dashboard');
           })
           .finally(() => {
             setIsAutoLoggingIn(false);

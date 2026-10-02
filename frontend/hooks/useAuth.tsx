@@ -18,7 +18,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (data: LoginRequest) => Promise<UserResponse>;
+  login: (data: LoginRequest, redirectTo?: string | false) => Promise<UserResponse>;
   register: (data: Omit<RegisterRequest, 'role'>) => Promise<UserResponse>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<UserResponse | null>;
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refreshUser]);
 
-  const login = async (credentials: LoginRequest): Promise<UserResponse> => {
+  const login = async (credentials: LoginRequest, redirectTo?: string | false): Promise<UserResponse> => {
     setIsLoading(true);
     try {
       const response = await api.post<AuthResponse>('/auth/login', credentials);
@@ -72,8 +72,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(response.token);
       setUser(response.user);
 
-      const redirectPath = ROLE_DASHBOARDS[response.user.role] || '/customer/dashboard';
-      router.push(redirectPath);
+      if (redirectTo !== false) {
+        const redirectPath = typeof redirectTo === 'string' ? redirectTo : (ROLE_DASHBOARDS[response.user.role] || '/customer/dashboard');
+        router.push(redirectPath);
+      }
       return response.user;
     } finally {
       setIsLoading(false);
