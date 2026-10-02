@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     const rawBackend = process.env.INTERNAL_BACKEND_URL;
     const backendUrl = rawBackend
       ? (rawBackend.startsWith("http") ? rawBackend : `http://${rawBackend}`)
-      : "http://localhost:8080";
+      : "http://backend:8080";
 
     return [
       {
