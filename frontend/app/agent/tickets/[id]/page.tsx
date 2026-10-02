@@ -204,16 +204,16 @@ export default function AgentTicketDetailPage({ params }: PageParams) {
         <div className="lg:col-span-2 space-y-6">
           {/* Main Card */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <span className="font-mono text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                  {ticket.ticketNumber}
-                </span>
-                <CardTitle className="text-base mt-1">{ticket.subject}</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <PriorityBadge priority={ticket.priority} />
-                <StatusBadge status={ticket.status} />
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 shadow-xs">
+                    {ticket.ticketNumber || (ticket as any).ticket_number}
+                  </span>
+                  <PriorityBadge priority={ticket.priority} />
+                  <StatusBadge status={ticket.status} />
+                </div>
+                <CardTitle className="text-lg font-bold">{ticket.subject}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>

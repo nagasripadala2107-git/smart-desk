@@ -18,12 +18,22 @@ import {
   Paperclip,
   AlertCircle,
   ExternalLink,
+  Copy,
+  Check,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function NewTicketPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
@@ -85,62 +95,97 @@ export default function NewTicketPage() {
   };
 
   if (createdTicket) {
+    const rawTicket: any = createdTicket;
+    const ticketId = rawTicket.id || rawTicket.data?.id || '';
+    const ticketNumber =
+      rawTicket.ticketNumber ||
+      rawTicket.ticket_number ||
+      rawTicket.data?.ticketNumber ||
+      rawTicket.data?.ticket_number ||
+      '';
+    const subjectText = rawTicket.subject || rawTicket.data?.subject || subject;
+    const statusVal = rawTicket.status || rawTicket.data?.status || 'OPEN';
+    const priorityVal = rawTicket.priority || rawTicket.data?.priority || priority;
+    const aiCat = rawTicket.aiCategory || rawTicket.data?.aiCategory || rawTicket.categoryName;
+
     return (
       <div className="max-w-2xl mx-auto py-8">
-        <Card className="border-emerald-200 dark:border-emerald-800">
+        <Card className="border-emerald-200 dark:border-emerald-800 shadow-md">
           <CardContent className="p-8 text-center space-y-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 mx-auto">
-              <CheckCircle2 className="w-8 h-8" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 mx-auto shadow-xs">
+              <CheckCircle2 className="w-9 h-9" />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                Ticket Created Successfully
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                Ticket Created Successfully!
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Your request has been logged in the SmartDesk system.
+                Your support request has been logged and assigned an official tracking number.
               </p>
+
+              {/* Prominent Official Ticket Number Banner */}
+              <div className="mt-4 inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 border-2 border-indigo-200 dark:border-indigo-800 shadow-xs">
+                <div className="text-left">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-indigo-700 dark:text-indigo-300">
+                    Official Ticket Number
+                  </div>
+                  <div className="font-mono text-2xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight">
+                    {ticketNumber || 'SD-2026-000001'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(ticketNumber || 'SD-2026-000001')}
+                  className="p-2.5 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 transition-colors border border-indigo-200 dark:border-indigo-700 bg-white dark:bg-slate-900"
+                  title="Copy Ticket Number"
+                >
+                  {copied ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-xl border border-slate-100 dark:border-slate-800 text-left space-y-3 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium">Ticket Number:</span>
+              <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                <span className="text-slate-500 font-medium">Ticket Reference:</span>
                 <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm">
-                  {createdTicket.ticketNumber}
+                  {ticketNumber || 'SD-2026-000001'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-medium">Subject:</span>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {createdTicket.subject}
+                  {subjectText}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-medium">Status:</span>
-                <StatusBadge status={createdTicket.status} />
+                <StatusBadge status={statusVal} />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-medium">Priority:</span>
-                <PriorityBadge priority={createdTicket.priority} />
+                <PriorityBadge priority={priorityVal} />
               </div>
-              {createdTicket.aiCategory && (
+              {aiCat && (
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Classification:</span>
-                  <span className="text-slate-800 dark:text-slate-200">{createdTicket.aiCategory}</span>
+                  <span className="text-slate-500 font-medium">AI Classification:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{aiCat}</span>
                 </div>
               )}
               <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-500">
-                Estimated Initial Response: Standard SLA window (under 4 hours for {createdTicket.priority} priority).
+                Estimated Initial Response: Standard SLA window (under 4 hours for {priorityVal} priority).
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <Link href={`/customer/tickets/${createdTicket.id}`} className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto gap-2">
-                  View Ticket Details
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
-              </Link>
+              {ticketId ? (
+                <Link href={`/customer/tickets/${ticketId}`} className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto gap-2">
+                    View Ticket Details
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </Link>
+              ) : null}
               <Link href="/customer/tickets" className="w-full sm:w-auto">
                 <Button variant="outline" className="w-full sm:w-auto">
                   Back to Ticket List

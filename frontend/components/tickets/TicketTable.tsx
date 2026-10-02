@@ -25,7 +25,7 @@ export function TicketTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-28">Ticket ID</TableHead>
+            <TableHead className="w-36">Ticket #</TableHead>
             <TableHead>Subject</TableHead>
             {showCustomer && <TableHead className="hidden md:table-cell">Customer</TableHead>}
             <TableHead className="hidden sm:table-cell">Category</TableHead>
@@ -39,9 +39,9 @@ export function TicketTable({
         <TableBody>
           {tickets.map((ticket) => (
             <TableRow key={ticket.id} className="group">
-              <TableCell className="font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400">
-                <Link href={`${basePath}/${ticket.id}`} className="hover:underline">
-                  {ticket.ticketNumber}
+              <TableCell>
+                <Link href={`${basePath}/${ticket.id}`} className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/80 dark:border-indigo-800/80 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors">
+                  {ticket.ticketNumber || (ticket as any).ticket_number}
                 </Link>
               </TableCell>
 
