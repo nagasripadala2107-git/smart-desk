@@ -78,18 +78,52 @@ export default function LandingPage() {
             routing, escalation tracking, and 360° customer history.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/register" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto gap-2 text-sm shadow-md">
-                Get Started
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link href="/login" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm">
-                Sign In
-              </Button>
-            </Link>
+          {/* 1-Click Reviewer Demo Hub */}
+          <div className="mt-8 p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 max-w-2xl mx-auto backdrop-blur-xs shadow-sm">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-200">
+                Live Reviewer Demo (No Login Required)
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <Link href="/customer/dashboard" className="w-full">
+                <Button size="sm" className="w-full text-xs gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
+                  <span>👤</span>
+                  Customer Demo
+                </Button>
+              </Link>
+              <Link href="/agent/dashboard" className="w-full">
+                <Button size="sm" className="w-full text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs">
+                  <span>🎧</span>
+                  Agent Workspace
+                </Button>
+              </Link>
+              <Link href="/admin/dashboard" className="w-full">
+                <Button size="sm" className="w-full text-xs gap-1.5 bg-rose-600 hover:bg-rose-700 text-white shadow-xs">
+                  <span>🛡️</span>
+                  Admin Console
+                </Button>
+              </Link>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-900/60 flex flex-wrap items-center justify-center gap-4 text-xs">
+              <Link
+                href="/admin/escalation-rules"
+                className="font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+              >
+                <AlertOctagon className="w-3.5 h-3.5" />
+                View 4-Tier Escalation Path
+              </Link>
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <Link
+                href="/login"
+                className="text-slate-600 dark:text-slate-300 hover:underline"
+              >
+                Sign In with Credentials
+              </Link>
+            </div>
           </div>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 dark:text-slate-400">

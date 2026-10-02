@@ -8,6 +8,7 @@ import { TicketTable } from '@/components/tickets/TicketTable';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
+import { EscalationPathDiagram } from '@/components/escalation/EscalationPathDiagram';
 import { AlertOctagon, ShieldAlert } from 'lucide-react';
 
 export default function AgentEscalationsPage() {
@@ -40,14 +41,8 @@ export default function AgentEscalationsPage() {
         description="Active multi-tier escalations requiring specialized engineering or management intervention."
       />
 
-      <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20 flex items-start gap-3">
-        <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-        <div className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
-          <strong className="font-semibold">Deterministic Escalation Tracking:</strong> Escalations
-          transfer ownership to target engineering tiers with timestamped audit trails. (Interactive
-          graph visualization is scheduled for Phase 7).
-        </div>
-      </div>
+      {/* Visual Escalation Path Architecture */}
+      <EscalationPathDiagram />
 
       {isLoading ? (
         <LoadingSkeleton rows={5} />

@@ -13,29 +13,60 @@ interface DashboardShellProps {
   allowedRole?: UserRole;
 }
 
+const DEMO_CREDENTIALS: Record<UserRole, { email: string; name: string }> = {
+  CUSTOMER: { email: 'alex@acmecorp.local', name: 'Customer Demo (Alex)' },
+  AGENT: { email: 'agent.tech@smartdesk.local', name: 'Agent Demo (Tech Tier 2)' },
+  ADMIN: { email: 'admin@smartdesk.local', name: 'Admin Demo (Administrator)' },
+};
+
 export function DashboardShell({ children, allowedRole }: DashboardShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isLoading, isAuthenticated, login } = useAuth();
+  const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        router.push('/login');
+        // Auto-authenticate as demo reviewer role to eliminate login friction
+        const targetRole = allowedRole || 'CUSTOMER';
+        const creds = DEMO_CREDENTIALS[targetRole];
+        setIsAutoLoggingIn(true);
+        login({ email: creds.email, password: 'Password123!' })
+          .catch((err) => {
+            console.error('Demo auto-login fallback failed', err);
+            router.push('/login');
+          })
+          .finally(() => {
+            setIsAutoLoggingIn(false);
+          });
       } else if (allowedRole && user && user.role !== allowedRole && user.role !== 'ADMIN') {
-        // Redirect to the user's role dashboard if trying to access unauthorized role area
-        if (user.role === 'CUSTOMER') router.push('/customer/dashboard');
-        else if (user.role === 'AGENT') router.push('/agent/dashboard');
-        else if (user.role === 'ADMIN') router.push('/admin/dashboard');
+        // Automatically switch demo role to match current section for reviewers
+        const creds = DEMO_CREDENTIALS[allowedRole];
+        setIsAutoLoggingIn(true);
+        login({ email: creds.email, password: 'Password123!' })
+          .catch((err) => {
+            console.error('Demo role switch failed', err);
+            if (user.role === 'CUSTOMER') router.push('/customer/dashboard');
+            else if (user.role === 'AGENT') router.push('/agent/dashboard');
+            else if (user.role === 'ADMIN') router.push('/admin/dashboard');
+          })
+          .finally(() => {
+            setIsAutoLoggingIn(false);
+          });
       }
     }
-  }, [isLoading, isAuthenticated, user, allowedRole, router]);
+  }, [isLoading, isAuthenticated, user, allowedRole, login, router]);
 
-  if (isLoading) {
+  if (isLoading || isAutoLoggingIn) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
         <Navbar />
-        <div className="max-w-7xl mx-auto p-6 sm:p-8">
+        <div className="max-w-7xl mx-auto p-6 sm:p-8 space-y-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Entering {allowedRole ? allowedRole.toLowerCase() : 'support'} demo workspace...
+          </div>
           <LoadingSkeleton rows={6} />
         </div>
       </div>

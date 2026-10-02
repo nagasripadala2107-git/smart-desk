@@ -13,6 +13,7 @@ import {
   Headphones,
   User as UserIcon,
 } from 'lucide-react';
+import { DemoRoleSwitcher } from '@/components/common/DemoRoleSwitcher';
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -71,9 +72,11 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         </Link>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <DemoRoleSwitcher />
+
         {user ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:flex flex-col items-end text-right">
               <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                 {user.firstName} {user.lastName}

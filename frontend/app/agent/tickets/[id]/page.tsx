@@ -293,6 +293,18 @@ export default function AgentTicketDetailPage({ params }: PageParams) {
                   ]}
                 />
               </div>
+
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full text-xs font-semibold gap-1.5 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                  onClick={() => setIsEscalateModalOpen(true)}
+                >
+                  <AlertOctagon className="w-4 h-4" />
+                  Escalate to Tier 2 / 3 / 4
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
